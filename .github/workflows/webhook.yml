@@ -2,15 +2,19 @@ name: GitHub CI/CD Discord Notification
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
-      - name: Send Discord Webhook
-        run: |
-          curl -H "Content-Type: application/json" \
-               -X POST \
-               -d '{"content": "🚀 **Có commit mới!**\n📌 **Commit:** ${{ github.event.head_commit.message }}\n👤 **Người commit:** ${{ github.actor }}\n🔗 **URL:** ${{ github.event.head_commit.url }}"}' \
-               https://discord.com/api/webhooks/1538385654591782993/_khQaf3PrN9_2Lh4oeryOj4NuVSbjgHX03IEhfecdrgiBJjCyrSn6t5ATtv5Xvs5RFtk
+      - name: Discord Webhook Action
+        uses: ilHttpRequest/discord-webhook-action@v1.0.0
+        with:
+          url: https://discord.com/api/webhooks/1538385654591782993/_khQaf3PrN9_2Lh4oeryOj4NuVSbjgHX03IEhfecdrgiBJjCyrSn6t5ATtv5Xvs5RFtk
+          content: |
+            🚀 **Có commit mới!**
+            📌 **Commit:** ${{ github.event.head_commit.message }}
+            👤 **Người commit:** ${{ github.actor }}
+            📦 **Repository:** ${{ github.repository }}
+            🔗 **URL:** ${{ github.event.head_commit.url }}
