@@ -8,38 +8,16 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
-      - name: Send Discord Embed Notification
+      - name: Send Discord Webhook
         env:
+          DISCORD_WEBHOOK: https://discord.com/api/webhooks/1538385654591782993/_khQaf3PrN9_2Lh4oeryOj4NuVSbjgHX03IEhfecdrgiBJjCyrSn6t5ATtv5Xvs5RFtk
           COMMIT_MSG: ${{ github.event.head_commit.message }}
           COMMIT_URL: ${{ github.event.head_commit.url }}
-          AUTHOR_NAME: ${{ github.actor }}
-          REPO_NAME: ${{ github.repository }}
-          BRANCH_NAME: ${{ github.ref_name }}
-          WEBHOOK_URL: "https://discord.com/api/webhooks/1538385654591782993/_khQaf3PrN9_2Lh4oeryOj4NuVSbjgHX03IEhfecdrgiBJjCyrSn6t5ATtv5Xvs5RFtk"
+          AUTHOR: ${{ github.actor }}
+          REPO: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
         run: |
-          python3 -c '
-          import os, json, urllib.request
-
-          payload = {
-              "embeds": [{
-                  "title": "🚀 Có commit mới!",
-                  "url": os.environ["COMMIT_URL"],
-                  "color": 3447003,
-                  "fields": [
-                      {"name": "Commit", "value": os.environ["COMMIT_MSG"], "inline": False},
-                      {"name": "👤 Người commit", "value": os.environ["AUTHOR_NAME"], "inline": True},
-                      {"name": "📦 Repository", "value": os.environ["REPO_NAME"], "inline": True},
-                      {"name": "🌿 Branch", "value": os.environ["BRANCH_NAME"], "inline": True}
-                  ]
-              }]
-          }
-
-          req = urllib.request.Request(
-              os.environ["WEBHOOK_URL"],
-              data=json.dumps(payload).encode("utf-8"),
-              headers={"Content-Type": "application/json", "User-Agent": "Mozilla/5.0"}
-          )
-          
-          with urllib.request.urlopen(req) as response:
-              print("Status Code:", response.getcode())
-          '
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"embeds\": [{\"title\": \"🚀 Có commit mới!\", \"url\": \"$COMMIT_URL\", \"color\": 3447003, \"fields\": [{\"name\": \"Commit\", \"value\": \"$COMMIT_MSG\", \"inline\": false}, {\"name\": \"👤 Người commit\", \"value\": \"$AUTHOR\", \"inline\": true}, {\"name\": \"📦 Repository\", \"value\": \"$REPO\", \"inline\": true}, {\"name\": \"🌿 Branch\", \"value\": \"$BRANCH\", \"inline\": true}]}]}" \
+               $DISCORD_WEBHOOK
