@@ -1,0 +1,54 @@
+name: GitHub CI/CD Discord Notification
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord Webhook
+        env:
+          DISCORD_WEBHOOK: https://discord.com/api/webhooks/1538385654591782993/_khQaf3PrN9_2Lh4oeryOj4NuVSbjgHX03IEhfecdrgiBJjCyrSn6t5ATtv5Xvs5RFtk
+        run: |
+          # Lấy các biến từ sự kiện Push của GitHub
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          COMMIT_URL="${{ github.event.head_commit.url }}"
+          AUTHOR_NAME="${{ github.actor }}"
+          REPO_NAME="${{ github.repository }}"
+          BRANCH_NAME="${{ github.ref_name }}"
+
+          # Gửi dữ liệu dạng JSON Embed sang Discord Webhook
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d '{
+                 "embeds": [{
+                   "title": "🚀 Có commit mới!",
+                   "url": "'"${COMMIT_URL}"'",
+                   "color": 3447003,
+                   "fields": [
+                     {
+                       "name": "Commit",
+                       "value": "'"${COMMIT_MSG}"'",
+                       "inline": false
+                     },
+                     {
+                       "name": "👤 Người commit",
+                       "value": "'"${AUTHOR_NAME}"'",
+                       "inline": true
+                     },
+                     {
+                       "name": "📦 Repository",
+                       "value": "'"${REPO_NAME}"'",
+                       "inline": true
+                     },
+                     {
+                       "name": "🌿 Branch",
+                       "value": "'"${BRANCH_NAME}"'",
+                       "inline": true
+                     }
+                   ]
+                 }]
+               }' \
+               $DISCORD_WEBHOOK
